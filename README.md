@@ -1,7 +1,8 @@
-# Configure Ubuntu 18.06 has a Production Server running a LEMP stack.
+# Configure Ubuntu 18.04 has a Production Server running a LEMP stack.
 
-This document will help you configure and prepare a production server using AWS services. <br>
-It is intended for CBDC Restigouche usage, if it happens that you access this file **it's totally fine**, there is no secret here!<br>
+This document will help you configure and prepare a production server using AWS services. 
+
+It is intended for CBDC Restigouche usage, if it happens that you access this file **it's totally fine**, there is no secret here!
 
 *Please note that conventions and example are our owns, adapt to your needs.*
 
@@ -45,14 +46,21 @@ For any question contact regarding this document, feel free to contact [Jonathan
 Voilà! You're up and running, you can now access your new system.
 
 ## Install Packages and Dependencies <a name="packages-dependencies"></a>
-First you'll need to `ssh` into the machine from your command line or your putty app.
+First you'll need to `ssh` into the machine from your **terminal** or your **putty** app.
 
 By default, the username is `ubuntu`.
 
 First help your "future you" and set the right timezone
+
 ```bash
 sudo timedatectl set-timezone America/Moncton
 ```
+
+> If you don't know your timezone, you can list it with:
+```bash
+timedatectl list-timezones
+```
+
 
 Then we will start updating the packages list then installing the dependencies.
 ```bash
@@ -78,17 +86,15 @@ sudo mysql_secure_installation
 ```bash
 sudo mysql -u root
 ```
-
-> *On a staging system if you want to get rid of mysql root protection:*
-> ```MySQL
-> UPDATE mysql.user SET plugin = 'mysql_native_password', authentication_string = PASSWORD('<Password>') WHERE User = 'root';
-> FLUSH PRIVILEGES;
-> ```
-
 ```MySQL
 CREATE USER '<Username>'@'localhost' IDENTIFIED BY '<Password>';
 CREATE DATABASE '<DatabaseName>';
 GRANT ALL PRIVILEGES ON <DatabaseName>.* TO '<Username>'@'localhost';
+FLUSH PRIVILEGES;
+```
+> *On a staging system if you want to get rid of mysql root protection:*
+ ``` MySQL
+UPDATE mysql.user SET plugin = 'mysql_native_password', authentication_string = PASSWORD('<Password>') WHERE User = 'root';
 FLUSH PRIVILEGES;
 ```
 
@@ -96,15 +102,16 @@ Then quit the MySQL CLI (`CTRL+D` or type `exit`)
 
 ## Configure Nginx <a name="nginx">
 
-Go to [nginxconfig.io](https://nginxconfig.io/) and create your files then download them locally and transfer them using `WinSCP`.
-
-Start your Nginx server:
+First let's stop Apache
 ```bash
 sudo systemctl stop apache2.service
-sudo systemctl start nginx.service
 ```
 
-Go to your [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home) instance configuration and open the https port (TCP 443).
+Open your https port (443) on [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home).
+
+
+Now go to [nginxconfig.io](https://nginxconfig.io/) and create your configuration files. Follow the whole instruction from [nginxconfig](https://nginxconfig.io/).
+
 
 Then follow the [nginxconfig.io](https://nginxconfig.io/) steps to install the files.
 
@@ -156,7 +163,7 @@ You can lose access to your machine if you don't take care.
    ```
     Modify the following lines
     ```bash
-    Port 2220
+    Port <DesiredSSHPort>
     PermitRootLogin no
     PasswordAuthentication no
     ```
@@ -166,12 +173,12 @@ You can lose access to your machine if you don't take care.
     ```
 
     ```bash
-    sudo ufw allow 2220
+    sudo ufw allow <DesiredSSHPort>
     sudo ufw allow http
     sudo ufw allow https
     sudo ufw enable
     ```
-    Also go to your [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home) instance configuration and open the port `TCP 2220`.
+    Also go to your [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home) instance configuration and open the port `TCP <DesiredSSHPort>`.
 
 5) Open a new terminal (without closing the first one) and login to make sure you still can have access to the machine.
 
@@ -210,6 +217,7 @@ git clone ssh://<AWS-IAMUSER>@git-codecommit.<AWS-Region>.amazonaws.com/v1/repos
 sudo apt-get install nodejs npm -y
 ```
 ## Install Composer <a name="composer">
+This command will fail in a near future, the hash is for the current version, please update hash accordingly or use the [automated download script](https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md)
 ```bash
 cd ~
 curl -sS https://getcomposer.org/installer -o composer-setup.php
@@ -247,3 +255,4 @@ wget https://gist.githubusercontent.com/jonathanlaf/0240b8c401651af742ac826a6912
 chmod +x fix_permission.sh
 ./fix_permission.sh
 ```
+

@@ -178,7 +178,7 @@ You can lose access to your machine if you don't take care.
     sudo ufw allow https
     sudo ufw enable
     ```
-    Also go to your [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home) instance configuration and open the port `TCP <DesiredSSHPort>`.
+    Also go to your [AWS Lightsail](https://lightsail.aws.amazon.com/ls/webapp/home) instance, then on networking tab. Delete port 22, and add the new port `TCP <DesiredSSHPort>`.
 
 5) Open a new terminal (without closing the first one) and login to make sure you still can have access to the machine.
 
